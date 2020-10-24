@@ -73,6 +73,12 @@ void decode() {
         ind++;
     }
     cout << "Mistake was in bit " << res << '\n';
+    v[res] = !v[res];
+    cout << "Resulting message\n";
+    for (int i = 0; i < sz; ++i) {
+        if (v[i]) cout << 1 << ' '; else cout << 0 << ' ';
+    }
+    cout << '\n';
 }
 
 int main(int argc, char* argv[]) {
