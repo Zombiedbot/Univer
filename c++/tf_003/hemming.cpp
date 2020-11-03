@@ -14,19 +14,19 @@ bool bool_sum(bool a, bool b) {
 
 void encode() {
     long long st = 1;
-    bool all_sum = false;
-    for (int i = 0; i < n; ++i) {
-        all_sum = bool_sum(all_sum, v[i]);
-    }
-    while(n > st) {
-        bool sum = false;
-        for (int i = 0; i < n; ++i) {
-            if(st & i) sum = bool_sum(sum, v[i]);
-        }
-        v.push_back(sum);
+    while (st <= v.size()) {
+        v.insert(v.begin() + st - 1, 0);
         st *= 2;
     }
-    v.push_back(all_sum);
+    st = 1;
+    while (st <= v.size()) {
+        bool res = false;
+        for (int i = 0; i < v.size(); ++i) {
+            if ((i + 1) & st) res ^= v[i];
+        }
+        if (res) v[st - 1] = 1;
+        st *= 2;
+    }
     cout << "size of encoded\n";
     cout << v.size() << '\n';
     cout << "encoded message\n";
@@ -35,7 +35,7 @@ void encode() {
     cout << '\n';
     srand (time(NULL));
     int rnd = rand() % v.size();
-    cout << "Random mistake in " << rnd << " bit\n";
+    cout << "Random mistake in " << rnd + 1 << " bit\n";
     v[rnd] = !v[rnd];
     for (int i = 0; i < v.size(); ++i)
         if (v[i]) cout << 1 << ' '; else cout << 0 << ' ';
@@ -43,39 +43,33 @@ void encode() {
 }
 
 void decode() {
-    int sz = 1;
-    int suf = 2;
-    while(sz * 2 + suf + 1 < n) {
-        suf += 1;
+    long long sz = 1;
+    long long res = 0;
+    while (sz <= v.size()) {
+        bool val = false;
+        for (int i = sz; i < v.size(); ++i) {
+            if ((i + 1) & sz) val ^= v[i];
+        }
+        if (val != v[sz - 1]) {
+            res |= sz;
+        }
         sz *= 2;
     }
-    sz = n - suf;
-    int ind = sz;
-    //cout << sz << ' ';
-    bool all_sum = v[v.size() - 1];
-    int step = 1;
-    bool cur_sum = false;
-    for (int i = 0; i < sz; ++i) cur_sum = bool_sum(cur_sum, v[i]);
-    if (cur_sum == all_sum) {
-        cout << "No mistake detected\n";
+    sz /= 2;
+    if (!res) {
+        cout << "Mistake was not found\n";
         return;
-    } 
-    int res = 0;
-    while(step < sz) {
-        bool sum = false;
-        for (int i = 0 ; i < sz; ++i) {
-            if(i & step) sum = bool_sum(sum, v[i]);
-        }
-        if (sum != v[ind]) {
-            res = res | step;
-        }
-        step *= 2;
-        ind++;
     }
     cout << "Mistake was in bit " << res << '\n';
-    v[res] = !v[res];
+    v[res - 1] = !v[res - 1];
+    /*
+    while(sz > 0) {
+        v.erase(v.begin() + sz - 1);
+        sz /= 2;
+    }
+    */
     cout << "Resulting message\n";
-    for (int i = 0; i < sz; ++i) {
+    for (int i = 0; i < v.size(); ++i) {
         if (v[i]) cout << 1 << ' '; else cout << 0 << ' ';
     }
     cout << '\n';
